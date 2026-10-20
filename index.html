@@ -1,0 +1,822 @@
+```html
+<!DOCTYPE html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <!-- Viewport fit cover for edge-to-edge WebView notches and gesture bars -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>AURA Mobile WebView Store</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        },
+                        accent: {
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* CSS Safe Area Inset Support for Edge-to-Edge WebView */
+        :root {
+            --sat: env(safe-area-inset-top, 0px);
+            --sab: env(safe-area-inset-bottom, 0px);
+            --sal: env(safe-area-inset-left, 0px);
+            --sar: env(safe-area-inset-right, 0px);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            padding-top: var(--sat);
+            padding-left: var(--sal);
+            padding-right: var(--sar);
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .safe-pt { padding-top: calc(var(--sat) + 0.5rem); }
+        .safe-pb { padding-bottom: calc(var(--sab) + 4rem); }
+        .safe-bottom-nav { padding-bottom: calc(var(--sab) + 0.25rem); }
+
+        /* Custom Scrollbar Removal for Native App Feel */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .glass-header {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .dark .glass-header {
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        /* 4x4 Grid Optimization for Mobile Screen Widths */
+        .grid-4x4 {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.375rem;
+        }
+        
+        .grid-2x2 {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.625rem;
+        }
+
+        .grid-1x1 {
+            display: flex;
+            flex-direction: column;
+            gap: 0.625rem;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 h-full flex flex-col antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- EDGE-TO-EDGE STICKY TOP HEADER -->
+    <header class="sticky top-0 z-40 glass-header border-b border-slate-200/80 dark:border-slate-800/80 transition-all">
+        <div class="px-3 pt-2 pb-2 space-y-2">
+            <!-- Top App Bar -->
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-600 to-accent-500 flex items-center justify-center text-white font-black text-sm shadow-md shadow-brand-500/20">
+                        A
+                    </div>
+                    <div>
+                        <h1 class="text-sm font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent leading-none">AURA Express</h1>
+                        <span class="text-[9px] font-semibold text-brand-600 dark:text-brand-400">WebView Ultra Store</span>
+                    </div>
+                </div>
+
+                <!-- Right Actions -->
+                <div class="flex items-center space-x-1.5">
+                    <!-- Layout Toggle Button -->
+                    <button onclick="cycleLayoutMode()" id="layoutToggleBtn" class="p-1.5 rounded-lg bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[10px] font-bold flex items-center gap-1" title="Change View Mode">
+                        <span id="layoutIcon">4x4</span>
+                    </button>
+
+                    <!-- Dark Mode Toggle -->
+                    <button onclick="toggleDarkMode()" class="p-1.5 rounded-lg bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-200">
+                        <svg id="themeIconSun" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        <svg id="themeIconMoon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    </button>
+
+                    <!-- Wishlist Button -->
+                    <button onclick="toggleWishlistDrawer(true)" class="p-1.5 rounded-lg bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-200 relative">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                        <span class="wishlistBadge absolute -top-1 -right-1 bg-accent-500 text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center opacity-0 scale-0 transition-all">0</span>
+                    </button>
+
+                    <!-- Cart Button -->
+                    <button onclick="toggleCartDrawer(true)" class="p-1.5 rounded-lg bg-brand-600 text-white relative shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                        <span class="cartBadge absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center opacity-0 scale-0 transition-all">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Bar & Filter Sheet Trigger -->
+            <div class="flex items-center gap-1.5">
+                <div class="relative flex-grow">
+                    <input type="text" oninput="handleSearch(this.value)" id="searchInput" placeholder="Search 440+ items..." class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-slate-200/70 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 border-none outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                    <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+                <button onclick="toggleFilterSheet(true)" class="p-1.5 rounded-xl bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                </button>
+            </div>
+
+            <!-- Category Pills Horizontal Scroll Carousel -->
+            <div id="categoryContainer" class="flex space-x-1.5 overflow-x-auto hide-scrollbar pt-1 pb-0.5"></div>
+        </div>
+    </header>
+
+    <!-- MAIN SCROLLABLE WEBVIEW CONTENT AREA -->
+    <main class="flex-grow p-2 space-y-2 safe-pb">
+        
+        <!-- Live Status Bar Information -->
+        <div class="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 px-1 font-semibold">
+            <span id="categoryHeading">All Categories (440 items)</span>
+            <span id="activeLayoutLabel" class="uppercase text-brand-600 dark:text-brand-400 font-extrabold">4x4 Grid Mode</span>
+        </div>
+
+        <!-- PRODUCT GRID CONTAINER (Default: 4x4 Grid) -->
+        <div id="productGrid" class="grid-4x4"></div>
+    </main>
+
+    <!-- EDGE-TO-EDGE STICKY BOTTOM NAVIGATION BAR -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 glass-header border-t border-slate-200/80 dark:border-slate-800/80 safe-bottom-nav">
+        <div class="flex justify-around items-center py-1.5 text-slate-500 dark:text-slate-400">
+            <button onclick="filterByCategory('All')" class="flex flex-col items-center space-y-0.5 text-brand-600 dark:text-brand-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 00-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                <span class="text-[9px] font-bold">Home</span>
+            </button>
+
+            <button onclick="toggleFilterSheet(true)" class="flex flex-col items-center space-y-0.5 hover:text-slate-800 dark:hover:text-white">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <span class="text-[9px] font-bold">Explore</span>
+            </button>
+
+            <button onclick="toggleWishlistDrawer(true)" class="flex flex-col items-center space-y-0.5 hover:text-slate-800 dark:hover:text-white relative">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                <span class="text-[9px] font-bold">Saved</span>
+            </button>
+
+            <button onclick="toggleCartDrawer(true)" class="flex flex-col items-center space-y-0.5 hover:text-slate-800 dark:hover:text-white relative">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                <span class="text-[9px] font-bold">Cart</span>
+            </button>
+        </div>
+    </nav>
+
+
+    <!-- ================================================================= -->
+    <!-- MOBILE WEBVIEW MODALS & DRAWERS -->
+    <!-- ================================================================= -->
+
+    <!-- CART SLIDE DRAWER -->
+    <div id="cartDrawer" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div id="cartPanel" class="fixed inset-y-0 right-0 w-full max-w-xs bg-white dark:bg-slate-900 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col safe-pt safe-pb">
+            <div class="p-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <h3 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">Shopping Cart</h3>
+                <button onclick="toggleCartDrawer(false)" class="p-1 text-slate-400 hover:text-slate-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Free Shipping Progress -->
+            <div class="bg-slate-50 dark:bg-slate-800/50 p-2 border-b border-slate-100 dark:border-slate-800 text-[10px]">
+                <div class="flex justify-between font-bold mb-1" id="shippingProgressText"></div>
+                <div class="w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div id="shippingProgressBar" class="h-full bg-brand-500 transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Cart Items -->
+            <div id="cartItemsList" class="flex-grow overflow-y-auto p-2 space-y-2"></div>
+
+            <!-- Summary & Coupon -->
+            <div class="p-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 space-y-2">
+                <div class="flex gap-1.5">
+                    <input type="text" id="couponInput" placeholder="Promo (AURA10)" class="flex-grow px-2 py-1 text-[10px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 uppercase">
+                    <button onclick="applyCoupon()" class="px-2.5 py-1 bg-slate-800 dark:bg-slate-700 text-white text-[10px] font-bold rounded-lg">Apply</button>
+                </div>
+
+                <div class="space-y-1 text-[10px] text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-200 dark:border-slate-800">
+                    <div class="flex justify-between"><span>Subtotal</span><span id="cartSubtotal">$0.00</span></div>
+                    <div class="flex justify-between"><span>Discount</span><span id="cartDiscount" class="text-brand-600 font-bold">-$0.00</span></div>
+                    <div class="flex justify-between"><span>Est. Tax (8%)</span><span id="cartTax">$0.00</span></div>
+                    <div class="flex justify-between font-extrabold text-xs text-slate-900 dark:text-white pt-1 border-t border-slate-200 dark:border-slate-800">
+                        <span>Total</span><span id="cartTotal" class="text-brand-600">$0.00</span>
+                    </div>
+                </div>
+
+                <button onclick="openCheckoutModal()" id="checkoutBtn" disabled class="w-full py-2 bg-brand-600 hover:bg-brand-500 disabled:bg-slate-300 dark:disabled:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-md transition-all">
+                    Checkout Now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WISHLIST DRAWER -->
+    <div id="wishlistDrawer" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div id="wishlistPanel" class="fixed inset-y-0 right-0 w-full max-w-xs bg-white dark:bg-slate-900 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col safe-pt safe-pb">
+            <div class="p-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <h3 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">Saved Wishlist</h3>
+                <button onclick="toggleWishlistDrawer(false)" class="p-1 text-slate-400 hover:text-slate-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="wishlistItemsList" class="flex-grow overflow-y-auto p-2 space-y-2"></div>
+        </div>
+    </div>
+
+    <!-- QUICK VIEW MODAL DRAWER -->
+    <div id="quickViewModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300 flex items-end sm:items-center justify-center">
+        <div id="quickViewContent" class="bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl max-w-md w-full p-4 shadow-2xl relative transform translate-y-full sm:translate-y-0 transition-transform duration-300 max-h-[85vh] overflow-y-auto safe-pb">
+            <button onclick="closeQuickViewModal()" class="absolute top-3 right-3 p-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div id="quickViewBody" class="space-y-3"></div>
+        </div>
+    </div>
+
+    <!-- SEARCH & FILTER BOTTOM SHEET -->
+    <div id="filterSheet" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300 flex items-end justify-center">
+        <div id="filterSheetContent" class="bg-white dark:bg-slate-900 rounded-t-3xl w-full p-4 shadow-2xl space-y-4 max-h-[80vh] overflow-y-auto safe-pb transform translate-y-full transition-transform duration-300">
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-2">
+                <h3 class="text-xs font-black uppercase text-slate-900 dark:text-white">Filter & Sort Items</h3>
+                <button onclick="toggleFilterSheet(false)" class="text-xs text-brand-600 font-bold">Done</button>
+            </div>
+
+            <!-- Sort By -->
+            <div>
+                <label class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Sort By</label>
+                <select id="sortSelect" onchange="handleSort(this.value)" class="w-full bg-slate-100 dark:bg-slate-800 border-none text-xs p-2 rounded-xl text-slate-900 dark:text-slate-100 outline-none">
+                    <option value="featured">Featured</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="rating">Highest Rated</option>
+                </select>
+            </div>
+
+            <!-- Max Price Slider -->
+            <div>
+                <div class="flex justify-between text-xs font-bold mb-1">
+                    <span class="text-slate-400 uppercase text-[10px]">Max Price</span>
+                    <span id="priceRangeVal" class="text-brand-600">$500</span>
+                </div>
+                <input type="range" min="10" max="500" value="500" oninput="handlePriceFilter(this.value)" class="w-full accent-brand-500">
+            </div>
+
+            <button onclick="resetFilters()" class="w-full py-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold">Reset Filters</button>
+        </div>
+    </div>
+
+    <!-- MULTI-STEP CHECKOUT SHEET -->
+    <div id="checkoutModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300 flex items-end justify-center">
+        <div class="bg-white dark:bg-slate-900 rounded-t-3xl w-full p-4 shadow-2xl space-y-3 max-h-[90vh] overflow-y-auto safe-pb">
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-2">
+                <h3 class="text-xs font-black uppercase text-slate-900 dark:text-white">Mobile Checkout</h3>
+                <button onclick="closeCheckoutModal()" class="text-slate-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+
+            <form onsubmit="handleCheckoutSubmit(event)" class="space-y-3 text-xs">
+                <div class="space-y-1.5">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase">Shipping Details</span>
+                    <input type="text" required placeholder="Full Name" class="w-full p-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none outline-none">
+                    <input type="text" required placeholder="Delivery Address" class="w-full p-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none outline-none">
+                    <input type="tel" required placeholder="Phone Number" class="w-full p-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none outline-none">
+                </div>
+
+                <div class="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase">Select Payment</span>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <label class="border border-slate-200 dark:border-slate-700 p-2 rounded-xl text-center cursor-pointer has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50/50">
+                            <input type="radio" name="payment" value="upi" checked class="hidden">
+                            <span class="font-bold text-indigo-600 block">UPI/QR</span>
+                        </label>
+                        <label class="border border-slate-200 dark:border-slate-700 p-2 rounded-xl text-center cursor-pointer has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50/50">
+                            <input type="radio" name="payment" value="card" class="hidden">
+                            <span class="font-bold block">Card</span>
+                        </label>
+                        <label class="border border-slate-200 dark:border-slate-700 p-2 rounded-xl text-center cursor-pointer has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50/50">
+                            <input type="radio" name="payment" value="cod" class="hidden">
+                            <span class="font-bold block">COD</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                    <div>
+                        <span class="text-[10px] text-slate-400">Total Payable</span>
+                        <div id="checkoutModalTotal" class="text-sm font-black text-brand-600">$0.00</div>
+                    </div>
+                    <button type="submit" class="px-5 py-2.5 bg-brand-600 text-white font-bold text-xs rounded-xl shadow-md">Confirm & Pay</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ORDER RECEIPT MODAL -->
+    <div id="orderSuccessModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-xs w-full p-5 text-center space-y-3 shadow-2xl">
+            <div class="w-10 h-10 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center mx-auto text-lg font-bold">✓</div>
+            <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Order Confirmed!</h2>
+            <div class="bg-slate-50 dark:bg-slate-800 p-2.5 rounded-xl text-left text-[10px] space-y-1">
+                <div class="flex justify-between"><span class="text-slate-400">Order ID:</span><span id="receiptOrderId" class="font-mono font-bold">#AUR-1092</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Paid:</span><span id="receiptTotal" class="font-bold text-brand-600">$0.00</span></div>
+            </div>
+            <button onclick="closeOrderSuccessModal()" class="w-full py-2 bg-brand-600 text-white text-xs font-bold rounded-xl">Continue Shopping</button>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION STACK -->
+    <div id="toastContainer" class="fixed bottom-14 left-1/2 transform -translate-x-1/2 z-50 flex flex-col space-y-1.5 pointer-events-none"></div>
+
+
+    <!-- ================================================================= -->
+    <!-- DYNAMIC DATA GENERATOR & APPLICATION LOGIC -->
+    <!-- ================================================================= -->
+    <script>
+        // 22 DISTINCT CATEGORIES
+        const CATEGORIES = [
+            "All", "Electronics", "Men's Wear", "Women's Wear", "Footwear",
+            "Accessories", "Home & Living", "Beauty & Skincare", "Jewelry", "Watches",
+            "Gaming", "Audio", "Sports & Fitness", "Toys & Baby", "Grocery",
+            "Books", "Automotive", "Kitchenware", "Office Supplies", "Pet Supplies",
+            "Travel Gear", "Smart Home"
+        ];
+
+        // DYNAMIC DATA GENERATOR FOR 440 PRODUCTS (20 products per category)
+        const PRODUCTS = [];
+        let globalId = 1;
+
+        CATEGORIES.filter(c => c !== "All").forEach(cat => {
+            for (let i = 1; i <= 20; i++) {
+                const basePrice = Math.floor(Math.random() * 250) + 15;
+                const discountPercent = Math.random() > 0.4 ? Math.floor(Math.random() * 30) + 10 : 0;
+                
+                PRODUCTS.push({
+                    id: globalId,
+                    name: `${cat} ${getProductNameKeyword(cat, i)} #${i}`,
+                    category: cat,
+                    price: basePrice,
+                    discount: discountPercent,
+                    rating: (Math.random() * 1.5 + 3.5).toFixed(1),
+                    badge: i === 1 ? "HOT" : i === 2 ? "NEW" : discountPercent > 20 ? "SALE" : null,
+                    image: `https://picsum.photos/seed/${cat.replace(/[^a-zA-Z]/g, '')}${i}/200/200`,
+                    description: `Premium quality ${cat.toLowerCase()} item crafted with modern aesthetics and top performance.`
+                });
+                globalId++;
+            }
+        });
+
+        function getProductNameKeyword(cat, index) {
+            const keywords = {
+                "Electronics": ["Smart Pad", "Power Hub", "Adapter Pro", "Mini Cam", "Air Tag", "Cable Max"],
+                "Men's Wear": ["Cotton Tee", "Denim Jacket", "Chino Pants", "Slim Shirt", "Hoodie", "Blazer"],
+                "Women's Wear": ["Floral Dress", "Silk Top", "Pleated Skirt", "Cardigan", "Jumpsuit", "Coat"],
+                "Footwear": ["Runner Pro", "Leather Loafer", "Casual Sneaker", "High Tops", "Slide", "Boots"],
+                "Accessories": ["Leather Belt", "Sunglasses", "Wallet", "Cap", "Scarf", "Key Ring"],
+                "Home & Living": ["Vase", "Cushion", "Desk Lamp", "Wall Clock", "Throw Blanket", "Organize Box"],
+                "Beauty & Skincare": ["Glow Serum", "Night Cream", "Clay Mask", "Lip Balm", "Facial Wash", "Mist"],
+                "Jewelry": ["Silver Ring", "Gold Chain", "Pendant", "Bracelet", "Earrings", "Charm"],
+                "Watches": ["Chronograph", "Digital Sport", "Minimal Dial", "Classic Leather", "Smart Band", "Diver"],
+                "Gaming": ["Controller", "RGB Mouse", "Mech Keyboard", "Headset", "Mousepad", "Cooler Stand"],
+                "Audio": ["Earbuds", "Bass Speaker", "Studio Mic", "Soundbar", "Audio DAC", "Boombox"],
+                "Sports & Fitness": ["Yoga Mat", "Dumbbell Set", "Bands", "Water Bottle", "Jump Rope", "Glove"],
+                "Toys & Baby": ["Building Blocks", "Plush Bear", "Puzzle", "Rattle", "Stroller Toy", "Board Game"],
+                "Grocery": ["Organic Tea", "Dark Chocolate", "Coffee Beans", "Nuts Mix", "Honey Jar", "Granola"],
+                "Books": ["Novel", "Self Growth", "Tech Guide", "Cookbook", "Art Album", "Sci-Fi Saga"],
+                "Automotive": ["Phone Mount", "Car Cleaner", "Dash Cam", "Seat Cushion", "Air Freshener", "LED Kit"],
+                "Kitchenware": ["Chef Knife", "Non-stick Pan", "Coffee Press", "Blender", "Spice Jar", "Cutting Board"],
+                "Office Supplies": ["Notebook", "Gel Pen Set", "Desk Organizer", "Stapler", "Sticky Notes", "File Folder"],
+                "Pet Supplies": ["Chew Toy", "Cat Bed", "Leash", "Pet Bowl", "Groom Brush", "Scratch Post"],
+                "Travel Gear": ["Duffle Bag", "Neck Pillow", "Passport Cover", "Luggage Tag", "Toiletry Bag", "Backpack"],
+                "Smart Home": ["Smart Plug", "WiFi Bulb", "Door Sensor", "IR Remote", "Smart Switch", "Cam Hub"]
+            };
+            const list = keywords[cat] || ["Item"];
+            return list[(index - 1) % list.length];
+        }
+
+        // STATE MANAGEMENT
+        let state = {
+            cart: [],
+            wishlist: [],
+            appliedCoupon: null,
+            layoutMode: '4x4', // '4x4', '2x2', '1x1'
+            filters: {
+                category: 'All',
+                maxPrice: 500,
+                searchQuery: '',
+                sort: 'featured'
+            }
+        };
+
+        // DOM LOAD
+        window.addEventListener('DOMContentLoaded', () => {
+            renderCategoryPills();
+            renderProducts();
+            updateCartUI();
+            updateWishlistUI();
+        });
+
+        // LAYOUT CYCLE SWITCHER
+        function cycleLayoutMode() {
+            if (state.layoutMode === '4x4') state.layoutMode = '2x2';
+            else if (state.layoutMode === '2x2') state.layoutMode = '1x1';
+            else state.layoutMode = '4x4';
+
+            const grid = document.getElementById('productGrid');
+            const icon = document.getElementById('layoutIcon');
+            const label = document.getElementById('activeLayoutLabel');
+
+            grid.className = `grid-${state.layoutMode}`;
+            icon.textContent = state.layoutMode.toUpperCase();
+            label.textContent = `${state.layoutMode} Mode`;
+
+            renderProducts();
+        }
+
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            document.getElementById('themeIconSun').classList.toggle('hidden', !isDark);
+            document.getElementById('themeIconMoon').classList.toggle('hidden', isDark);
+        }
+
+        // CATEGORY PILLS RENDER
+        function renderCategoryPills() {
+            const container = document.getElementById('categoryContainer');
+            container.innerHTML = CATEGORIES.map(cat => `
+                <button onclick="filterByCategory('${cat}')" class="px-2.5 py-1 rounded-full text-[10px] font-bold whitespace-nowrap transition-all ${state.filters.category === cat ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}">
+                    ${cat}
+                </button>
+            `).join('');
+        }
+
+        function filterByCategory(cat) {
+            state.filters.category = cat;
+            renderCategoryPills();
+            renderProducts();
+        }
+
+        function handleSearch(q) {
+            state.filters.searchQuery = q.toLowerCase().trim();
+            renderProducts();
+        }
+
+        function handlePriceFilter(val) {
+            state.filters.maxPrice = Number(val);
+            document.getElementById('priceRangeVal').textContent = `$${val}`;
+            renderProducts();
+        }
+
+        function handleSort(val) {
+            state.filters.sort = val;
+            renderProducts();
+        }
+
+        function resetFilters() {
+            state.filters = { category: 'All', maxPrice: 500, searchQuery: '', sort: 'featured' };
+            renderCategoryPills();
+            renderProducts();
+            toggleFilterSheet(false);
+        }
+
+        // PRODUCT RENDER ENGINE
+        function renderProducts() {
+            let list = PRODUCTS.filter(p => {
+                if (state.filters.category !== 'All' && p.category !== state.filters.category) return false;
+                if (p.price > state.filters.maxPrice) return false;
+                if (state.filters.searchQuery && !p.name.toLowerCase().includes(state.filters.searchQuery)) return false;
+                return true;
+            });
+
+            if (state.filters.sort === 'price-low') list.sort((a,b) => a.price - b.price);
+            if (state.filters.sort === 'price-high') list.sort((a,b) => b.price - a.price);
+            if (state.filters.sort === 'rating') list.sort((a,b) => b.rating - a.rating);
+
+            document.getElementById('categoryHeading').textContent = `${state.filters.category} (${list.length} items)`;
+            const grid = document.getElementById('productGrid');
+
+            if (list.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-xs text-slate-400">No products found.</div>`;
+                return;
+            }
+
+            // Render Product Cards based on Layout Mode
+            grid.innerHTML = list.map(p => {
+                const isSaved = state.wishlist.includes(p.id);
+                const cartItem = state.cart.find(c => c.id === p.id);
+                const qty = cartItem ? cartItem.qty : 0;
+
+                if (state.layoutMode === '4x4') {
+                    // COMPACT 4x4 CARD
+                    return `
+                    <div class="bg-white dark:bg-slate-900 rounded-lg p-1 border border-slate-200/60 dark:border-slate-800/80 flex flex-col justify-between shadow-xs relative">
+                        ${p.badge ? `<span class="absolute top-1 left-1 z-10 text-[7px] font-black uppercase px-1 rounded bg-brand-600 text-white">${p.badge}</span>` : ''}
+                        <div onclick="openQuickViewModal(${p.id})" class="relative aspect-square rounded overflow-hidden mb-1 bg-slate-100">
+                            <img src="${p.image}" class="w-full h-full object-cover" loading="lazy">
+                        </div>
+                        <h4 onclick="openQuickViewModal(${p.id})" class="text-[9px] font-bold truncate text-slate-900 dark:text-white leading-tight">${p.name}</h4>
+                        <div class="flex items-center justify-between mt-1">
+                            <span class="text-[9px] font-extrabold text-brand-600 dark:text-brand-400">$${p.price}</span>
+                            <button onclick="addToCart(${p.id})" class="w-4 h-4 rounded bg-brand-600 text-white font-bold flex items-center justify-center text-[10px]">+</button>
+                        </div>
+                    </div>`;
+                } else if (state.layoutMode === '2x2') {
+                    // MEDIUM 2x2 CARD
+                    return `
+                    <div class="bg-white dark:bg-slate-900 rounded-xl p-2 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between shadow-sm relative">
+                        <div class="relative aspect-square rounded-lg overflow-hidden mb-1.5 bg-slate-100">
+                            <img src="${p.image}" class="w-full h-full object-cover">
+                            <button onclick="toggleWishlist(${p.id})" class="absolute top-1.5 right-1.5 p-1 rounded-full bg-white/80 dark:bg-slate-900/80">
+                                <svg class="w-3 h-3 ${isSaved ? 'fill-red-500 text-red-500' : 'text-slate-600'}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                            </button>
+                        </div>
+                        <span class="text-[8px] font-bold text-slate-400 uppercase">${p.category}</span>
+                        <h4 onclick="openQuickViewModal(${p.id})" class="text-[11px] font-bold truncate text-slate-900 dark:text-white">${p.name}</h4>
+                        <div class="flex items-center justify-between mt-1.5">
+                            <span class="text-xs font-black text-slate-900 dark:text-white">$${p.price}</span>
+                            <button onclick="addToCart(${p.id})" class="px-2 py-1 bg-brand-600 text-white rounded-lg text-[10px] font-bold">Add</button>
+                        </div>
+                    </div>`;
+                } else {
+                    // LIST 1x1 ROW CARD
+                    return `
+                    <div class="bg-white dark:bg-slate-900 rounded-xl p-2 border border-slate-200/80 dark:border-slate-800 flex items-center space-x-3 shadow-sm">
+                        <img src="${p.image}" class="w-16 h-16 rounded-lg object-cover bg-slate-100">
+                        <div class="flex-grow">
+                            <span class="text-[8px] font-bold text-slate-400 uppercase">${p.category}</span>
+                            <h4 onclick="openQuickViewModal(${p.id})" class="text-xs font-bold text-slate-900 dark:text-white">${p.name}</h4>
+                            <div class="flex items-center space-x-2 mt-1">
+                                <span class="text-xs font-black text-brand-600">$${p.price}</span>
+                                <span class="text-[9px] text-amber-500 font-bold">★ ${p.rating}</span>
+                            </div>
+                        </div>
+                        <button onclick="addToCart(${p.id})" class="px-3 py-1.5 bg-brand-600 text-white rounded-xl text-xs font-bold shrink-0">Add to Cart</button>
+                    </div>`;
+                }
+            }).join('');
+        }
+
+        // CART LOGIC
+        function addToCart(id) {
+            const p = PRODUCTS.find(item => item.id === id);
+            const exist = state.cart.find(item => item.id === id);
+            if (exist) {
+                exist.qty += 1;
+            } else {
+                state.cart.push({ ...p, qty: 1 });
+            }
+            updateCartUI();
+            showToast(`Added to cart`);
+        }
+
+        function updateCartQty(id, delta) {
+            const item = state.cart.find(i => i.id === id);
+            if (!item) return;
+            item.qty += delta;
+            if (item.qty <= 0) state.cart = state.cart.filter(i => i.id !== id);
+            updateCartUI();
+        }
+
+        function applyCoupon() {
+            const code = document.getElementById('couponInput').value.trim().toUpperCase();
+            if (code === 'AURA10') {
+                state.appliedCoupon = 0.10;
+                showToast("10% Coupon Applied!");
+            } else {
+                showToast("Invalid Coupon Code");
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const count = state.cart.reduce((sum, i) => sum + i.qty, 0);
+            const subtotal = state.cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            const discount = state.appliedCoupon ? subtotal * state.appliedCoupon : 0;
+            const tax = (subtotal - discount) * 0.08;
+            const total = subtotal - discount + tax;
+
+            document.querySelectorAll('.cartBadge').forEach(el => {
+                el.textContent = count;
+                el.className = `cartBadge absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all ${count > 0 ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`;
+            });
+
+            const cartList = document.getElementById('cartItemsList');
+            if (state.cart.length === 0) {
+                cartList.innerHTML = `<p class="text-center text-slate-400 text-xs py-8">Bag is empty.</p>`;
+            } else {
+                cartList.innerHTML = state.cart.map(i => `
+                    <div class="flex items-center space-x-2 p-1.5 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-800 text-xs">
+                        <img src="${i.image}" class="w-10 h-10 rounded-lg object-cover">
+                        <div class="flex-grow">
+                            <h4 class="font-bold truncate text-[11px] text-slate-900 dark:text-white">${i.name}</h4>
+                            <span class="text-brand-600 font-bold text-[10px]">$${i.price}</span>
+                            <div class="flex items-center space-x-1 mt-0.5">
+                                <button onclick="updateCartQty(${i.id}, -1)" class="w-4 h-4 bg-slate-200 dark:bg-slate-700 rounded font-bold text-[10px]">-</button>
+                                <span class="text-[10px] font-bold">${i.qty}</span>
+                                <button onclick="updateCartQty(${i.id}, 1)" class="w-4 h-4 bg-slate-200 dark:bg-slate-700 rounded font-bold text-[10px]">+</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const target = 100;
+            const progress = Math.min(100, (subtotal / target) * 100);
+            document.getElementById('shippingProgressBar').style.width = `${progress}%`;
+            document.getElementById('shippingProgressText').innerHTML = subtotal >= target 
+                ? '<span class="text-brand-600 font-bold">🎉 FREE Express Shipping!</span>'
+                : `<span>Add $${(target - subtotal).toFixed(2)} for Free Shipping</span>`;
+
+            document.getElementById('cartSubtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('cartDiscount').textContent = `-$${discount.toFixed(2)}`;
+            document.getElementById('cartTax').textContent = `$${tax.toFixed(2)}`;
+            document.getElementById('cartTotal').textContent = `$${total.toFixed(2)}`;
+            document.getElementById('checkoutBtn').disabled = state.cart.length === 0;
+            document.getElementById('checkoutModalTotal').textContent = `$${total.toFixed(2)}`;
+        }
+
+        function toggleCartDrawer(open) {
+            const drawer = document.getElementById('cartDrawer');
+            const panel = document.getElementById('cartPanel');
+            if (open) {
+                drawer.classList.remove('opacity-0', 'pointer-events-none');
+                panel.classList.remove('translate-x-full');
+            } else {
+                drawer.classList.add('opacity-0', 'pointer-events-none');
+                panel.classList.add('translate-x-full');
+            }
+        }
+
+        // WISHLIST LOGIC
+        function toggleWishlist(id) {
+            if (state.wishlist.includes(id)) {
+                state.wishlist = state.wishlist.filter(i => i !== id);
+                showToast("Removed from wishlist");
+            } else {
+                state.wishlist.push(id);
+                showToast("Saved to wishlist");
+            }
+            updateWishlistUI();
+            renderProducts();
+        }
+
+        function updateWishlistUI() {
+            document.querySelectorAll('.wishlistBadge').forEach(el => {
+                el.textContent = state.wishlist.length;
+                el.className = `wishlistBadge absolute -top-1 -right-1 bg-accent-500 text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all ${state.wishlist.length > 0 ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`;
+            });
+
+            const saved = PRODUCTS.filter(p => state.wishlist.includes(p.id));
+            const list = document.getElementById('wishlistItemsList');
+            if (saved.length === 0) {
+                list.innerHTML = `<p class="text-center text-slate-400 text-xs py-8">No saved items.</p>`;
+            } else {
+                list.innerHTML = saved.map(i => `
+                    <div class="flex items-center justify-between p-1.5 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-800 text-xs">
+                        <div class="flex items-center space-x-2">
+                            <img src="${i.image}" class="w-8 h-8 rounded-lg object-cover">
+                            <span class="font-bold truncate text-[10px] text-slate-900 dark:text-white">${i.name}</span>
+                        </div>
+                        <button onclick="addToCart(${i.id}); toggleWishlist(${i.id});" class="px-2 py-0.5 bg-brand-600 text-white text-[9px] font-bold rounded-md">Move</button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function toggleWishlistDrawer(open) {
+            const drawer = document.getElementById('wishlistDrawer');
+            const panel = document.getElementById('wishlistPanel');
+            if (open) {
+                drawer.classList.remove('opacity-0', 'pointer-events-none');
+                panel.classList.remove('translate-x-full');
+            } else {
+                drawer.classList.add('opacity-0', 'pointer-events-none');
+                panel.classList.add('translate-x-full');
+            }
+        }
+
+        // QUICK VIEW MODAL
+        function openQuickViewModal(id) {
+            const p = PRODUCTS.find(item => item.id === id);
+            const modal = document.getElementById('quickViewModal');
+            const body = document.getElementById('quickViewBody');
+
+            body.innerHTML = `
+                <div class="aspect-square rounded-2xl overflow-hidden bg-slate-100">
+                    <img src="${p.image}" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <span class="text-[9px] font-bold text-slate-400 uppercase">${p.category}</span>
+                    <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">${p.name}</h3>
+                    <p class="text-xs text-slate-500 mt-1">${p.description}</p>
+                </div>
+                <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <span class="text-base font-black text-brand-600">$${p.price}</span>
+                    <button onclick="addToCart(${p.id}); closeQuickViewModal();" class="px-4 py-2 bg-brand-600 text-white rounded-xl text-xs font-bold">Add to Cart</button>
+                </div>
+            `;
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            document.getElementById('quickViewContent').classList.remove('translate-y-full');
+        }
+
+        function closeQuickViewModal() {
+            const modal = document.getElementById('quickViewModal');
+            document.getElementById('quickViewContent').classList.add('translate-y-full');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        // FILTER SHEET
+        function toggleFilterSheet(open) {
+            const sheet = document.getElementById('filterSheet');
+            const content = document.getElementById('filterSheetContent');
+            if (open) {
+                sheet.classList.remove('opacity-0', 'pointer-events-none');
+                content.classList.remove('translate-y-full');
+            } else {
+                sheet.classList.add('opacity-0', 'pointer-events-none');
+                content.classList.add('translate-y-full');
+            }
+        }
+
+        // CHECKOUT & RECEIPT
+        function openCheckoutModal() {
+            toggleCartDrawer(false);
+            document.getElementById('checkoutModal').classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkoutModal').classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        function handleCheckoutSubmit(e) {
+            e.preventDefault();
+            closeCheckoutModal();
+
+            const subtotal = state.cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            document.getElementById('receiptTotal').textContent = `$${(subtotal * 1.08).toFixed(2)}`;
+            document.getElementById('receiptOrderId').textContent = `#AUR-${Math.floor(1000 + Math.random() * 9000)}`;
+
+            state.cart = [];
+            updateCartUI();
+
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 70, spread: 50, origin: { y: 0.7 } });
+            }
+
+            document.getElementById('orderSuccessModal').classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        function closeOrderSuccessModal() {
+            document.getElementById('orderSuccessModal').classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        // TOAST ENGINE
+        function showToast(msg) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'bg-slate-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg transition-all duration-300 opacity-0 transform translate-y-1';
+            toast.innerHTML = `✓ ${msg}`;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.remove('opacity-0', 'translate-y-1'), 10);
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
+```
