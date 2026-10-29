@@ -57,7 +57,7 @@
     import { getFirestore, collection, getDocs, addDoc, doc, setDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyC10S-863Y5Tm6D3eLkZA186U-MUIpJM",
+      apiKey: "AIzaSyC1_0S-863Y5Tm6D3eLk_ZA186U-MUIpJM",
       authDomain: "noman-clouth-house.firebaseapp.com",
       projectId: "noman-clouth-house",
       storageBucket: "noman-clouth-house.firebasestorage.app",
@@ -280,8 +280,8 @@
       </section>
 
       <!-- SCREEN 5: USER PROFILE TAB -->
-      <section id="view-profile" class="screen-view p-4 max-w-2xl mx-auto">
-        <div class="bg-gradient-to-tr from-slate-900 to-emerald-900 rounded-2xl p-5 text-white shadow-lg mb-4 flex items-center space-x-4">
+      <section id="view-profile" class="screen-view p-4 max-w-2xl mx-auto space-y-4">
+        <div class="bg-gradient-to-tr from-slate-900 to-emerald-900 rounded-2xl p-5 text-white shadow-lg flex items-center space-x-4">
           <div class="w-14 h-14 rounded-full bg-emerald-500 text-slate-900 flex items-center justify-center text-xl font-black shadow border-2 border-white">
             <i class="fa-solid fa-user"></i>
           </div>
@@ -293,6 +293,7 @@
         </div>
 
         <div class="space-y-3 text-xs">
+          <!-- Saved Delivery Address -->
           <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-2">
             <span class="font-bold text-gray-800 text-xs block uppercase tracking-wider mb-2">Saved Delivery Address</span>
             <div class="flex items-start space-x-2 text-gray-600">
@@ -301,6 +302,7 @@
             </div>
           </div>
 
+          <!-- Account Settings -->
           <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3">
             <span class="font-bold text-gray-800 text-xs block uppercase tracking-wider">Account Settings</span>
             <button onclick="switchTab('orders')" class="w-full flex justify-between items-center py-2 border-b border-gray-100 text-gray-700 font-medium">
@@ -316,6 +318,65 @@
               <span class="font-semibold text-gray-500">Cash On Delivery</span>
             </div>
           </div>
+
+          <!-- FEEDBACK & REVIEW FORM -->
+          <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3">
+            <span class="font-bold text-gray-800 text-xs block uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-star text-amber-400"></i> Customer Feedback & Reviews
+            </span>
+            <p class="text-gray-500 text-[11px]">Aapka experience kaisa raha Noman Cloth House ke sath? Apni qeemti raaye zaroor dein!</p>
+            
+            <form onsubmit="submitFeedback(event)" class="space-y-2.5 pt-1">
+              <div>
+                <input type="text" id="fb-name" required placeholder="Aapka Naam" class="w-full border border-gray-300 rounded-xl p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-xs">
+              </div>
+              <div>
+                <select id="fb-rating" class="w-full border border-gray-300 rounded-xl p-2.5 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none text-xs font-bold text-amber-600">
+                  <option value="5">⭐⭐⭐⭐⭐ (5/5) - Outstanding Quality</option>
+                  <option value="4">⭐⭐⭐⭐ (4/5) - Very Good</option>
+                  <option value="3">⭐⭐⭐ (3/5) - Good / Average</option>
+                  <option value="2">⭐⭐ (2/5) - Needs Improvement</option>
+                  <option value="1">⭐ (1/5) - Poor</option>
+                </select>
+              </div>
+              <div>
+                <textarea id="fb-message" required rows="2" placeholder="Apna message ya review yahan likhein..." class="w-full border border-gray-300 rounded-xl p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-xs"></textarea>
+              </div>
+              <button type="submit" id="fb-submit-btn" class="w-full bg-slate-900 hover:bg-emerald-600 text-white font-bold py-2.5 rounded-xl shadow text-xs transition">
+                Submit Feedback
+              </button>
+            </form>
+          </div>
+
+          <!-- Q&A / FREQUENTLY ASKED QUESTIONS -->
+          <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3">
+            <span class="font-bold text-gray-800 text-xs block uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-question text-emerald-600"></i> Frequently Asked Questions (Q&A)
+            </span>
+            
+            <div class="space-y-2 pt-1 text-[11px]">
+              <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                <p class="font-bold text-gray-900 mb-0.5">Q1: Kya Cash on Delivery (COD) poore Pakistan me available hai?</p>
+                <p class="text-gray-600">Haan bilkul! Hum Pakistan ke har chote bare shehar me 100% Cash on Delivery provide kar rahe hain.</p>
+              </div>
+
+              <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                <p class="font-bold text-gray-900 mb-0.5">Q2: Order kitne din me deliver hota hai?</p>
+                <p class="text-gray-600">Aam taur par order confirm hone ke baad 2 se 4 working days me courier aapke ghar deliver kar deta hai.</p>
+              </div>
+
+              <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                <p class="font-bold text-gray-900 mb-0.5">Q3: Return ya Exchange policy kya hai?</p>
+                <p class="text-gray-600">Agar size ya fabric me koi bhi masla ho, toh aap 7 days ke andar easily return ya exchange karwa sakte hain.</p>
+              </div>
+
+              <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                <p class="font-bold text-gray-900 mb-0.5">Q4: Unstitched suits ki quality kaisi hoti hai?</p>
+                <p class="text-gray-600">Hum sirf 100% guaranteed pure lawn, cotton aur washwear fabric rakhte hain jo dhoone ke baad bhi kharab nahi hote.</p>
+              </div>
+            </div>
+          </div>
+
         </div>
       </section>
     </main>
@@ -932,6 +993,34 @@
       }
     }
     window.submitOrder = submitOrder;
+
+    // Submit Customer Feedback to Firebase Firestore
+    async function submitFeedback(e) {
+      e.preventDefault();
+      const name = document.getElementById('fb-name').value;
+      const rating = document.getElementById('fb-rating').value;
+      const message = document.getElementById('fb-message').value;
+
+      try {
+        if (window.db && window.fbSDK) {
+          const { collection, addDoc } = window.fbSDK;
+          await addDoc(collection(window.db, "feedbacks"), {
+            name,
+            rating: Number(rating),
+            message,
+            uid: window.currentCustomerUid || "guest",
+            createdAt: new Date()
+          });
+          showToast("Thank you for your feedback!");
+          document.getElementById('fb-name').value = "";
+          document.getElementById('fb-message').value = "";
+        }
+      } catch (err) {
+        console.error("Feedback error:", err);
+        showToast("Error submitting feedback!");
+      }
+    }
+    window.submitFeedback = submitFeedback;
 
     function renderOrders() {
       const container = document.getElementById('orders-container');
