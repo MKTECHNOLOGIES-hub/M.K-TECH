@@ -16,7 +16,7 @@
       font-family: 'Inter', sans-serif;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
-      background-color: #f8fafc;
+      background-color: #f3f4f6;
       margin: 0;
       padding: 0;
     }
@@ -29,14 +29,13 @@
     }
     .app-container {
       width: 100%;
-      max-width: 480px;
+      max-width: 100%;
       min-height: 100vh;
       background-color: #ffffff;
       position: relative;
       display: flex;
       flex-direction: column;
       margin: 0 auto;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
     }
     .screen-view {
       display: none;
@@ -75,10 +74,13 @@
     signInAnonymously(auth)
       .then((userCredential) => {
         const uid = userCredential.user.uid;
+        console.log("Customer signed in anonymously with UID:", uid);
         window.currentCustomerUid = uid;
+        
+        // Update Profile UID Display automatically
         const uidEl = document.getElementById('prof-contact');
         if (uidEl) {
-          uidEl.innerText = `User UID: ${uid.substring(0, 12)}...`;
+          uidEl.innerText = `Firebase UID: ${uid}`;
         }
       })
       .catch((error) => {
@@ -90,43 +92,49 @@
     window.fbSDK = { collection, getDocs, addDoc, doc, setDoc, query, where, orderBy };
   </script>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800 flex justify-center items-start">
-  <div class="app-container w-full relative pb-28 min-h-screen bg-white">
+<body class="bg-gray-100 min-h-screen text-gray-800">
+  <div class="app-container w-full relative pb-24 min-h-screen">
     
-    <!-- Top Minimalist App Header (Inspired by reference UI) -->
-    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100">
-      <div class="px-4 py-3.5 flex items-center justify-between">
-        <button onclick="switchTab('products')" class="p-1.5 rounded-full hover:bg-slate-50 text-slate-800 transition">
-          <i class="fa-solid fa-bars-staggered text-base"></i>
-        </button>
-        <div class="text-center">
-          <h1 class="text-xs font-black tracking-widest uppercase text-slate-900">NOMAN CLOTH HOUSE</h1>
+    <!-- Top App Header -->
+    <header class="sticky top-0 z-40 bg-slate-900 text-white shadow-md">
+      <div class="px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center font-black text-lg text-white shadow">
+            N
+          </div>
+          <div>
+            <h1 class="text-sm sm:text-base font-extrabold tracking-wide text-white leading-tight uppercase">NOMAN CLOTH HOUSE</h1>
+            <p class="text-[9px] sm:text-[10px] text-emerald-400 font-medium tracking-wider flex items-center gap-1">
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> PAKISTAN COD STORE
+            </p>
+          </div>
         </div>
         <div class="flex items-center space-x-1">
-          <button onclick="openSearchOverlay()" class="p-2 rounded-full hover:bg-slate-50 text-slate-700 transition" title="Search">
-            <i class="fa-solid fa-magnifying-glass text-sm"></i>
+          <button onclick="openSearchOverlay()" class="p-2 rounded-full hover:bg-slate-800 text-gray-200 transition" title="Search">
+            <i class="fa-solid fa-magnifying-glass text-lg text-emerald-400"></i>
           </button>
-          <button onclick="switchTab('profile')" class="p-2 rounded-full hover:bg-slate-50 text-slate-700 transition" title="Profile">
-            <i class="fa-regular fa-user text-sm"></i>
+          <button onclick="switchTab('cart')" class="relative p-2 rounded-full hover:bg-slate-800 transition" title="Cart">
+            <i class="fa-solid fa-bag-shopping text-lg text-gray-200"></i>
+            <span id="cart-badge" class="absolute -top-1 -right-1 bg-emerald-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-slate-900 hidden">0</span>
           </button>
         </div>
       </div>
     </header>
 
     <!-- FULL SEARCH OVERLAY -->
-    <div id="search-overlay" class="fixed inset-0 bg-white z-50 w-full max-w-[480px] mx-auto hidden flex-col">
-      <div class="bg-white border-b border-slate-100 p-3.5 flex items-center gap-3">
-        <button onclick="closeSearchOverlay()" class="p-2 text-slate-700 hover:text-slate-900">
-          <i class="fa-solid fa-arrow-left text-base"></i>
+    <div id="search-overlay" class="fixed inset-0 bg-white z-50 w-full mx-auto hidden flex-col">
+      <div class="bg-slate-900 p-3 flex items-center gap-3 shadow-md text-white">
+        <button onclick="closeSearchOverlay()" class="p-2 text-white hover:text-emerald-400">
+          <i class="fa-solid fa-arrow-left text-lg"></i>
         </button>
         <div class="relative flex-grow">
-          <input type="text" id="search-input" onkeyup="handleSearch()" placeholder="Search unstitched, stitched, shoes..." class="w-full bg-slate-100 text-xs text-slate-900 placeholder-slate-400 pl-9 pr-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900">
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
+          <input type="text" id="search-input" onkeyup="handleSearch()" placeholder="Search unstitched, stitched, shoes..." class="w-full bg-slate-800 text-sm text-white placeholder-gray-400 pl-9 pr-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-400 text-sm"></i>
         </div>
       </div>
       <div class="p-4 flex-grow overflow-y-auto">
-        <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">Search Results</h3>
-        <div id="search-results-grid" class="grid grid-cols-2 gap-3"></div>
+        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Search Results</h3>
+        <div id="search-results-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
       </div>
     </div>
 
@@ -134,118 +142,100 @@
     <main class="flex-grow">
       
       <!-- SCREEN 1: HOME PAGE -->
-      <section id="view-home" class="screen-view active p-4 space-y-4">
-        <!-- Hero Banner Card -->
-        <div class="relative rounded-3xl overflow-hidden bg-slate-900 text-white p-6 shadow-md">
-          <div class="relative z-10 max-w-[200px]">
-            <span class="bg-emerald-500 text-white text-[9px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">New Arrival</span>
-            <h2 class="text-base font-extrabold mt-2 leading-tight">Winter & Lawn Collection 2026</h2>
-            <p class="text-[11px] text-slate-300 mt-1">Premium Pakistani Stitched & Unstitched Suits with COD.</p>
-            <button onclick="switchTab('products')" class="mt-3 bg-white text-slate-900 font-bold text-xs px-4 py-2 rounded-xl shadow active:scale-95 transition">
-              Shop Now
-            </button>
-          </div>
-          <div class="absolute right-0 bottom-0 top-0 w-1/2 opacity-75">
-            <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400&auto=format&fit=crop&q=80" class="w-full h-full object-cover" alt="Hero">
-          </div>
+      <section id="view-home" class="screen-view active p-4">
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="text-sm font-bold text-gray-800">Explore Collections</h3>
+          <button onclick="switchTab('products')" class="text-xs text-emerald-600 font-bold">View All <i class="fa-solid fa-chevron-right text-[10px]"></i></button>
         </div>
-
-        <div>
-          <div class="flex justify-between items-center mb-3">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900">Categories</h3>
-            <button onclick="switchTab('products')" class="text-[11px] text-slate-500 font-semibold hover:text-slate-900">See All</button>
-          </div>
-          <div class="flex space-x-2 overflow-x-auto no-scrollbar py-1" id="home-category-pills"></div>
-        </div>
-
-        <div>
-          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 mb-3">Featured Products</h3>
-          <div class="grid grid-cols-2 gap-3" id="home-products-grid">
-            <p class="col-span-full text-center text-xs text-slate-400 py-8">
-              <i class="fa-solid fa-spinner animate-spin text-slate-800 text-base mb-2 block"></i> Loading collection...
-            </p>
-          </div>
+        <div class="flex space-x-2 overflow-x-auto no-scrollbar py-1 mb-4" id="home-category-pills"></div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="home-products-grid">
+          <p class="col-span-full text-center text-xs text-gray-400 py-8">
+            <i class="fa-solid fa-spinner animate-spin text-emerald-600 text-lg mb-2 block"></i> Loading products from Firebase...
+          </p>
         </div>
       </section>
 
       <!-- SCREEN 2: ALL PRODUCTS PAGE -->
-      <section id="view-products" class="screen-view p-4 space-y-4">
-        <div class="flex justify-between items-center">
-          <h2 class="text-sm font-extrabold text-slate-900 uppercase tracking-wide">Catalog</h2>
-          <span id="product-count" class="text-[11px] text-slate-400 font-medium">0 Items</span>
+      <section id="view-products" class="screen-view p-4">
+        <div class="flex justify-between items-center mb-2">
+          <h2 class="text-base font-bold text-gray-800">Our Products</h2>
+          <span id="product-count" class="text-xs text-gray-500 font-medium">0 Items</span>
         </div>
-        <div class="flex space-x-2 overflow-x-auto no-scrollbar py-1" id="category-pills"></div>
-        <div class="grid grid-cols-2 gap-3.5" id="products-grid"></div>
+        <div class="mb-4">
+          <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider block mb-2">Explore Categories</span>
+          <div class="flex space-x-2 overflow-x-auto no-scrollbar py-1" id="category-pills"></div>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="products-grid"></div>
       </section>
 
       <!-- SCREEN 3: CART & CHECKOUT TAB -->
-      <section id="view-cart" class="screen-view p-4 space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h2 class="text-sm font-black uppercase tracking-wider text-slate-900">Shopping Bag</h2>
-          <button onclick="clearCart()" class="text-[11px] text-rose-500 font-semibold hover:underline">Clear Bag</button>
-        </div>
+      <section id="view-cart" class="screen-view p-4">
+        <h2 class="text-lg font-bold text-gray-800 mb-3 flex items-center justify-between">
+          <span>Shopping Bag</span>
+          <button onclick="clearCart()" class="text-xs text-red-500 font-normal hover:underline">Clear All</button>
+        </h2>
         
-        <div id="cart-empty-state" class="py-16 text-center">
-          <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-300 text-2xl">
-            <i class="fa-solid fa-bag-shopping"></i>
+        <div id="cart-empty-state" class="py-12 text-center">
+          <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-400 text-3xl">
+            <i class="fa-solid fa-cart-flatbed"></i>
           </div>
-          <p class="text-slate-700 font-bold text-xs">Your shopping bag is empty</p>
-          <p class="text-[11px] text-slate-400 mt-0.5">Explore our trendy collections and add items.</p>
-          <button onclick="switchTab('products')" class="mt-4 bg-slate-900 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow">
-            Start Shopping
+          <p class="text-gray-600 font-medium text-sm">Your shopping bag is empty!</p>
+          <p class="text-xs text-gray-400 mt-1">Explore our latest stitched & unstitched collections.</p>
+          <button onclick="switchTab('products')" class="mt-4 bg-emerald-600 text-white font-semibold text-xs px-6 py-2.5 rounded-xl shadow">
+            Browse Products
           </button>
         </div>
 
         <div id="cart-content" class="hidden space-y-4">
           <div id="cart-items-list" class="space-y-3"></div>
           
-          <div class="bg-slate-50 rounded-2xl p-3.5 border border-slate-100">
-            <label class="block text-[11px] font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-              <i class="fa-solid fa-truck-fast text-slate-900"></i> Select Courier (COD Pakistan)
+          <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-100 mt-4">
+            <label class="block text-xs font-bold text-emerald-900 mb-2 flex items-center gap-1.5">
+              <i class="fa-solid fa-truck-fast text-emerald-600"></i> Select Courier Service (COD Pakistan)
             </label>
-            <select id="courier-select" onchange="updateCartTotals()" class="w-full bg-white border border-slate-200 text-xs font-medium text-slate-800 rounded-xl p-2.5 focus:ring-2 focus:ring-slate-900 focus:outline-none">
+            <select id="courier-select" onchange="updateCartTotals()" class="w-full bg-white border border-emerald-200 text-xs font-medium text-gray-800 rounded-xl p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
               <option value="180|Call Courier">Call Courier — Rs 180 (3-5 Days)</option>
               <option value="190|Trax Express">Trax Express — Rs 190 (2-4 Days)</option>
               <option value="200|Leopard Courier" selected>Leopard Courier — Rs 200 (2-3 Days)</option>
               <option value="220|M&P Express">M&P Express — Rs 220 (2-3 Days)</option>
-              <option value="250|TCS Courier">TCS Express — Rs 250 (1-2 Days)</option>
+              <option value="250|TCS Courier">TCS Express — Rs 250 (1-2 Days Express)</option>
             </select>
           </div>
 
-          <div class="bg-slate-50 rounded-2xl p-3.5 border border-slate-100 space-y-2 text-xs">
-            <div class="flex justify-between text-slate-500">
-              <span>Subtotal</span>
-              <span class="font-semibold text-slate-800" id="cart-subtotal">Rs 0</span>
+          <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 space-y-2 text-xs">
+            <div class="flex justify-between text-gray-600">
+              <span>Items Subtotal</span>
+              <span class="font-semibold" id="cart-subtotal">Rs 0</span>
             </div>
-            <div class="flex justify-between text-slate-500">
-              <span>Delivery Fee</span>
-              <span class="font-semibold text-slate-800" id="cart-delivery">Rs 200</span>
+            <div class="flex justify-between text-gray-600">
+              <span>Courier Delivery Fee</span>
+              <span class="font-semibold text-emerald-600" id="cart-delivery">Rs 200</span>
             </div>
-            <div class="border-t border-slate-200 my-1.5 pt-2 flex justify-between text-xs font-black text-slate-900">
+            <div class="border-t border-gray-200 my-1 pt-2 flex justify-between text-sm font-extrabold text-gray-900">
               <span>Total Amount (COD)</span>
-              <span id="cart-total" class="text-slate-900 text-sm">Rs 0</span>
+              <span id="cart-total" class="text-emerald-600">Rs 0</span>
             </div>
           </div>
 
-          <div class="bg-white rounded-2xl border border-slate-200 p-4 space-y-3">
-            <h3 class="text-[11px] font-black text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-2 flex items-center justify-between">
-              <span>Shipping Information</span>
-              <span class="text-[9px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">100% COD</span>
+          <div class="bg-white rounded-2xl border border-gray-200 p-4 pt-3 space-y-3 shadow-sm">
+            <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wider border-b pb-2 flex items-center justify-between">
+              <span>Customer Details (COD)</span>
+              <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-semibold">Cash On Delivery</span>
             </h3>
             
             <form id="checkout-form" onsubmit="submitOrder(event)" class="space-y-3 text-xs">
               <div>
-                <label class="block text-slate-600 font-semibold mb-1">Full Name *</label>
-                <input type="text" id="cust-name" required placeholder="e.g. Muhammad Noman" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 focus:ring-2 focus:ring-slate-900 focus:outline-none">
+                <label class="block text-gray-700 font-semibold mb-1">1. Full Name *</label>
+                <input type="text" id="cust-name" required placeholder="e.g. Muhammad Noman" class="w-full border border-gray-300 rounded-xl p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
               </div>
               <div>
-                <label class="block text-slate-600 font-semibold mb-1">Mobile Number / Email *</label>
-                <input type="text" id="cust-contact" required placeholder="e.g. 03001234567" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 focus:ring-2 focus:ring-slate-900 focus:outline-none">
+                <label class="block text-gray-700 font-semibold mb-1">2. Email or Mobile Phone *</label>
+                <input type="text" id="cust-contact" required placeholder="e.g. 03001234567 or email@gmail.com" class="w-full border border-gray-300 rounded-xl p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
               </div>
               <div>
-                <label class="block text-slate-600 font-semibold mb-1">City *</label>
-                <select id="cust-city" required class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 focus:ring-2 focus:ring-slate-900 focus:outline-none">
-                  <option value="">-- Select City --</option>
+                <label class="block text-gray-700 font-semibold mb-1">3. City (Pakistan) *</label>
+                <select id="cust-city" required class="w-full border border-gray-300 rounded-xl p-2.5 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                  <option value="">-- Select Your City --</option>
                   <option value="Karachi">Karachi</option>
                   <option value="Lahore">Lahore</option>
                   <option value="Islamabad">Islamabad</option>
@@ -258,18 +248,20 @@
                   <option value="Sialkot">Sialkot</option>
                   <option value="Hyderabad">Hyderabad</option>
                   <option value="Bahawalpur">Bahawalpur</option>
+                  <option value="Sargodha">Sargodha</option>
+                  <option value="Sukkur">Sukkur</option>
                 </select>
               </div>
               <div>
-                <label class="block text-slate-600 font-semibold mb-1">Complete Delivery Address *</label>
-                <textarea id="cust-address" required rows="2" placeholder="House/Flat No, Street, Area" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 focus:ring-2 focus:ring-slate-900 focus:outline-none"></textarea>
+                <label class="block text-gray-700 font-semibold mb-1">4. Complete Local Address *</label>
+                <textarea id="cust-address" required rows="2" placeholder="House/Flat No, Street, Sector, Mohallah or Landmark" class="w-full border border-gray-300 rounded-xl p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
               </div>
               <div>
-                <label class="block text-slate-600 font-semibold mb-1">Postal Code *</label>
-                <input type="text" id="cust-postal" required placeholder="e.g. 75500" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 focus:ring-2 focus:ring-slate-900 focus:outline-none">
+                <label class="block text-gray-700 font-semibold mb-1">5. Postal Code *</label>
+                <input type="text" id="cust-postal" required placeholder="e.g. 75500 or 54000" class="w-full border border-gray-300 rounded-xl p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
               </div>
-              <button type="submit" id="submit-btn" class="w-full bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white font-bold py-3.5 rounded-xl shadow-md text-xs tracking-wider uppercase mt-2 transition">
-                CONFIRM ORDER (COD)
+              <button type="submit" id="submit-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold py-3 rounded-xl shadow-lg shadow-emerald-600/30 text-sm tracking-wide mt-2">
+                <i class="fa-solid fa-check-circle mr-1.5"></i> CONFIRM CASH ON DELIVERY ORDER
               </button>
             </form>
           </div>
@@ -277,150 +269,166 @@
       </section>
 
       <!-- SCREEN 4: MY ORDERS TAB -->
-      <section id="view-orders" class="screen-view p-4 space-y-4">
-        <h2 class="text-sm font-extrabold uppercase tracking-wide text-slate-900">My Orders</h2>
-        <div id="orders-container" class="space-y-3">
-          <div id="no-orders-msg" class="py-16 text-center text-slate-400">
-            <i class="fa-solid fa-box-open text-3xl mb-2 text-slate-300"></i>
-            <p class="text-xs font-semibold">No orders placed yet.</p>
+      <section id="view-orders" class="screen-view p-4">
+        <h2 class="text-lg font-bold text-gray-800 mb-3">Order Tracking & History</h2>
+        <div id="orders-container" class="space-y-4">
+          <div id="no-orders-msg" class="py-12 text-center text-gray-400">
+            <i class="fa-solid fa-box-open text-4xl mb-2 text-gray-300"></i>
+            <p class="text-sm font-medium">No placed orders yet.</p>
           </div>
         </div>
       </section>
 
       <!-- SCREEN 5: USER PROFILE TAB -->
-      <section id="view-profile" class="screen-view p-4 space-y-4">
-        <div class="bg-slate-900 rounded-2xl p-5 text-white shadow-md flex items-center space-x-3.5">
-          <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-base font-bold border border-white/20">
+      <section id="view-profile" class="screen-view p-4 max-w-2xl mx-auto space-y-4">
+        <div class="bg-gradient-to-tr from-slate-900 to-emerald-900 rounded-2xl p-5 text-white shadow-lg flex items-center space-x-4">
+          <div class="w-14 h-14 rounded-full bg-emerald-500 text-slate-900 flex items-center justify-center text-xl font-black shadow border-2 border-white">
             <i class="fa-solid fa-user"></i>
           </div>
           <div>
-            <h3 class="font-bold text-sm" id="prof-name">Valued Customer</h3>
-            <p class="text-[11px] text-slate-300 font-mono" id="prof-contact">Connecting...</p>
-            <span class="inline-block mt-1 text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded font-bold uppercase tracking-wider">Verified COD User</span>
+            <h3 class="font-bold text-base" id="prof-name">Guest Customer</h3>
+            <p class="text-xs text-emerald-300 font-mono" id="prof-contact">Loading...</p>
+            <span class="inline-block mt-1 text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-semibold">COD Pakistan Verified User</span>
           </div>
         </div>
 
         <div class="space-y-3 text-xs">
-          <!-- Saved Address -->
-          <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-1.5">
-            <span class="font-bold text-slate-400 text-[10px] block uppercase tracking-wider">Saved Shipping Address</span>
-            <div class="flex items-start space-x-2 text-slate-700 pt-1">
-              <i class="fa-solid fa-location-dot text-slate-900 mt-0.5"></i>
-              <p id="prof-address" class="text-xs">No address saved yet. Complete an order to save your address details automatically.</p>
+          <!-- Saved Delivery Address -->
+          <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-2">
+            <span class="font-bold text-gray-800 text-xs block uppercase tracking-wider mb-2">Saved Delivery Address</span>
+            <div class="flex items-start space-x-2 text-gray-600">
+              <i class="fa-solid fa-location-dot text-emerald-600 mt-0.5 text-sm"></i>
+              <p id="prof-address">No address saved yet. Complete an order to save your address details.</p>
             </div>
           </div>
 
-          <!-- Quick Navigation Menu -->
-          <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2.5">
-            <span class="font-bold text-slate-400 text-[10px] block uppercase tracking-wider">Account Settings</span>
-            <button onclick="switchTab('orders')" class="w-full flex justify-between items-center py-2 border-b border-slate-50 text-slate-700 font-medium">
-              <span class="flex items-center gap-2"><i class="fa-solid fa-box text-slate-900 text-sm w-5"></i> Order History & Tracking</span>
-              <i class="fa-solid fa-chevron-right text-xs text-slate-300"></i>
+          <!-- Account Settings -->
+          <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3">
+            <span class="font-bold text-gray-800 text-xs block uppercase tracking-wider">Account Settings</span>
+            <button onclick="switchTab('orders')" class="w-full flex justify-between items-center py-2 border-b border-gray-100 text-gray-700 font-medium">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-box text-emerald-600"></i> My Orders & Tracking</span>
+              <i class="fa-solid fa-chevron-right text-gray-300"></i>
             </button>
-            <button onclick="switchTab('cart')" class="w-full flex justify-between items-center py-2 border-b border-slate-50 text-slate-700 font-medium">
-              <span class="flex items-center gap-2"><i class="fa-solid fa-bag-shopping text-slate-900 text-sm w-5"></i> Shopping Bag</span>
-              <i class="fa-solid fa-chevron-right text-xs text-slate-300"></i>
+            <button onclick="switchTab('cart')" class="w-full flex justify-between items-center py-2 border-b border-gray-100 text-gray-700 font-medium">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-cart-shopping text-emerald-600"></i> Shopping Bag</span>
+              <i class="fa-solid fa-chevron-right text-gray-300"></i>
             </button>
-            <div class="flex justify-between items-center py-2 text-slate-700 font-medium">
-              <span class="flex items-center gap-2"><i class="fa-solid fa-shield-halved text-slate-900 text-sm w-5"></i> Payment Method</span>
-              <span class="font-bold text-slate-900">Cash on Delivery</span>
+            <div class="flex justify-between items-center py-2 text-gray-700 font-medium">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-truck text-emerald-600"></i> Default Shipping</span>
+              <span class="font-semibold text-gray-500">Cash On Delivery</span>
             </div>
           </div>
 
-          <!-- FEEDBACK & REVIEWS -->
-          <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-            <span class="font-bold text-slate-400 text-[10px] block uppercase tracking-wider flex items-center gap-1.5">
-              <i class="fa-solid fa-star text-amber-500"></i> Customer Feedback & Reviews
+          <!-- FEEDBACK & REVIEW FORM -->
+          <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3">
+            <span class="font-bold text-gray-800 text-xs block uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-star text-amber-400"></i> Customer Feedback & Reviews
             </span>
-            <p class="text-slate-500 text-[11px]">Aapka experience kaisa raha Noman Cloth House ke sath? Apni qeemti raaye zaroor dein!</p>
+            <p class="text-gray-500 text-[11px]">Aapka experience kaisa raha Noman Cloth House ke sath? Apni qeemti raaye zaroor dein!</p>
             
-            <form onsubmit="submitFeedback(event)" class="space-y-2.5">
+            <form onsubmit="submitFeedback(event)" class="space-y-2.5 pt-1">
               <div>
-                <input type="text" id="fb-name" required placeholder="Aapka Naam" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 focus:ring-2 focus:ring-slate-900 focus:outline-none text-xs">
+                <input type="text" id="fb-name" required placeholder="Aapka Naam" class="w-full border border-gray-300 rounded-xl p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-xs">
               </div>
               <div>
-                <select id="fb-rating" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 focus:ring-2 focus:ring-slate-900 focus:outline-none text-xs font-bold text-amber-600">
+                <select id="fb-rating" class="w-full border border-gray-300 rounded-xl p-2.5 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none text-xs font-bold text-amber-600">
                   <option value="5">⭐⭐⭐⭐⭐ (5/5) - Outstanding Quality</option>
                   <option value="4">⭐⭐⭐⭐ (4/5) - Very Good</option>
                   <option value="3">⭐⭐⭐ (3/5) - Good / Average</option>
+                  <option value="2">⭐⭐ (2/5) - Needs Improvement</option>
+                  <option value="1">⭐ (1/5) - Poor</option>
                 </select>
               </div>
               <div>
-                <textarea id="fb-message" required rows="2" placeholder="Apna review yahan likhein..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 focus:ring-2 focus:ring-slate-900 focus:outline-none text-xs"></textarea>
+                <textarea id="fb-message" required rows="2" placeholder="Apna message ya review yahan likhein..." class="w-full border border-gray-300 rounded-xl p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-xs"></textarea>
               </div>
-              <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs transition">
+              <button type="submit" id="fb-submit-btn" class="w-full bg-slate-900 hover:bg-emerald-600 text-white font-bold py-2.5 rounded-xl shadow text-xs transition">
                 Submit Feedback
               </button>
             </form>
           </div>
 
-          <!-- FAQ SECTION -->
-          <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2.5">
-            <span class="font-bold text-slate-400 text-[10px] block uppercase tracking-wider">Frequently Asked Questions</span>
+          <!-- Q&A / FREQUENTLY ASKED QUESTIONS -->
+          <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3">
+            <span class="font-bold text-gray-800 text-xs block uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-question text-emerald-600"></i> Frequently Asked Questions (Q&A)
+            </span>
             
-            <div class="space-y-2 text-[11px] pt-1">
-              <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <p class="font-bold text-slate-900 mb-0.5">Q: Kya COD poore Pakistan me available hai?</p>
-                <p class="text-slate-600">Haan bilkul! Hum Pakistan ke tamam shehron me 100% Cash on Delivery provide karte hain.</p>
+            <div class="space-y-2 pt-1 text-[11px]">
+              <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                <p class="font-bold text-gray-900 mb-0.5">Q1: Kya Cash on Delivery (COD) poore Pakistan me available hai?</p>
+                <p class="text-gray-600">Haan bilkul! Hum Pakistan ke har chote bare shehar me 100% Cash on Delivery provide kar rahe hain.</p>
               </div>
-              <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <p class="font-bold text-slate-900 mb-0.5">Q: Return ya exchange policy kya hai?</p>
-                <p class="text-slate-600">Aapko 7 days ke andar size ya quality issue par easy return/exchange ki sahulat milti hai.</p>
+
+              <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                <p class="font-bold text-gray-900 mb-0.5">Q2: Order kitne din me deliver hota hai?</p>
+                <p class="text-gray-600">Aam taur par order confirm hone ke baad 2 se 4 working days me courier aapke ghar deliver kar deta hai.</p>
+              </div>
+
+              <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                <p class="font-bold text-gray-900 mb-0.5">Q3: Return ya Exchange policy kya hai?</p>
+                <p class="text-gray-600">Agar size ya fabric me koi bhi masla ho, toh aap 7 days ke andar easily return ya exchange karwa sakte hain.</p>
+              </div>
+
+              <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                <p class="font-bold text-gray-900 mb-0.5">Q4: Unstitched suits ki quality kaisi hoti hai?</p>
+                <p class="text-gray-600">Hum sirf 100% guaranteed pure lawn, cotton aur washwear fabric rakhte hain jo dhoone ke baad bhi kharab nahi hote.</p>
               </div>
             </div>
           </div>
+
         </div>
       </section>
     </main>
 
-    <!-- 5 BOTTOM NAV BUTTONS (Minimalist UI) -->
-    <nav class="absolute bottom-0 left-0 w-full bg-white border-t border-slate-100 z-40 flex justify-around items-center py-2 px-1 shadow-sm">
-      <button onclick="switchTab('home')" id="nav-home" class="nav-btn flex flex-col items-center justify-center text-slate-900 w-1/5 py-1">
-        <i class="fa-solid fa-house text-sm"></i>
-        <span class="text-[9px] font-semibold mt-1">Home</span>
+    <!-- 5 BOTTOM NAV BUTTONS -->
+    <nav class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 z-40 flex justify-around items-center py-2 px-1 shadow-lg">
+      <button onclick="switchTab('home')" id="nav-home" class="nav-btn flex flex-col items-center justify-center text-emerald-600 w-1/5">
+        <i class="fa-solid fa-house text-base"></i>
+        <span class="text-[10px] font-semibold mt-0.5">Home</span>
       </button>
-      <button onclick="switchTab('products')" id="nav-products" class="nav-btn flex flex-col items-center justify-center text-slate-400 w-1/5 py-1">
-        <i class="fa-solid fa-shirt text-sm"></i>
-        <span class="text-[9px] font-semibold mt-1">Shop</span>
+      <button onclick="switchTab('products')" id="nav-products" class="nav-btn flex flex-col items-center justify-center text-gray-400 w-1/5">
+        <i class="fa-solid fa-shirt text-base"></i>
+        <span class="text-[10px] font-semibold mt-0.5">Products</span>
       </button>
-      <button onclick="switchTab('cart')" id="nav-cart" class="nav-btn flex flex-col items-center justify-center text-slate-400 w-1/5 py-1 relative">
-        <i class="fa-solid fa-bag-shopping text-sm"></i>
-        <span class="text-[9px] font-semibold mt-1">Bag</span>
-        <span id="nav-cart-badge" class="absolute top-0 right-4 bg-slate-900 text-white text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center hidden">0</span>
+      <button onclick="switchTab('cart')" id="nav-cart" class="nav-btn flex flex-col items-center justify-center text-gray-400 w-1/5 relative">
+        <i class="fa-solid fa-basket-shopping text-base"></i>
+        <span class="text-[10px] font-semibold mt-0.5">Cart</span>
+        <span id="nav-cart-badge" class="absolute top-0 right-4 bg-emerald-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
       </button>
-      <button onclick="switchTab('orders')" id="nav-orders" class="nav-btn flex flex-col items-center justify-center text-slate-400 w-1/5 py-1">
-        <i class="fa-solid fa-receipt text-sm"></i>
-        <span class="text-[9px] font-semibold mt-1">Orders</span>
+      <button onclick="switchTab('orders')" id="nav-orders" class="nav-btn flex flex-col items-center justify-center text-gray-400 w-1/5">
+        <i class="fa-solid fa-receipt text-base"></i>
+        <span class="text-[10px] font-semibold mt-0.5">Orders</span>
       </button>
-      <button onclick="switchTab('profile')" id="nav-profile" class="nav-btn flex flex-col items-center justify-center text-slate-400 w-1/5 py-1">
-        <i class="fa-regular fa-user text-sm"></i>
-        <span class="text-[9px] font-semibold mt-1">Profile</span>
+      <button onclick="switchTab('profile')" id="nav-profile" class="nav-btn flex flex-col items-center justify-center text-gray-400 w-1/5">
+        <i class="fa-solid fa-user text-base"></i>
+        <span class="text-[10px] font-semibold mt-0.5">Profile</span>
       </button>
     </nav>
 
-    <!-- PRODUCT DETAIL PAGE (Matching reference layout style) -->
-    <div id="product-detail-page" class="fixed inset-0 bg-white z-50 w-full max-w-[480px] mx-auto hidden flex-col overflow-y-auto">
-      <div class="sticky top-0 bg-white/95 backdrop-blur-md border-b border-slate-100 z-20 px-4 py-3 flex items-center justify-between">
-        <button onclick="closeProductDetail()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 hover:bg-slate-200">
-          <i class="fa-solid fa-arrow-left text-xs"></i>
+    <!-- PRODUCT DETAIL PAGE -->
+    <div id="product-detail-page" class="fixed inset-0 bg-white z-50 w-full mx-auto hidden flex-col overflow-y-auto">
+      <div class="sticky top-0 bg-white border-b border-gray-100 z-20 px-4 py-3 flex items-center justify-between">
+        <button onclick="closeProductDetail()" class="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-700">
+          <i class="fa-solid fa-arrow-left text-base"></i>
         </button>
-        <span class="font-extrabold text-[11px] text-slate-800 uppercase tracking-widest">Product Detail</span>
-        <button onclick="closeProductDetail(); switchTab('cart');" class="p-2 relative">
-          <i class="fa-solid fa-bag-shopping text-base text-slate-800"></i>
+        <span class="font-bold text-xs text-gray-700 uppercase tracking-wider">Product Details</span>
+        <button onclick="closeProductDetail(); switchTab('cart');" class="relative p-2">
+          <i class="fa-solid fa-bag-shopping text-lg text-gray-700"></i>
         </button>
       </div>
-      <div id="product-detail-content" class="pb-28 w-full"></div>
+      <div id="product-detail-content" class="pb-24 max-w-2xl mx-auto w-full"></div>
     </div>
 
     <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-xl z-50 transition-all duration-300 transform -translate-y-10 opacity-0 pointer-events-none flex items-center gap-2">
+    <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-2xl z-50 transition-all duration-300 transform -translate-y-10 opacity-0 pointer-events-none flex items-center gap-2 border border-slate-700">
       <i class="fa-solid fa-circle-check text-emerald-400"></i>
       <span id="toast-message">Added to cart!</span>
     </div>
 
   </div>
 
-  <!-- EMBEDDED FRONTEND ENGINE -->
+  <!-- EMBEDDED FRONTEND MAIN ENGINE SCRIPT -->
   <script>
     const CATEGORIES = [
       "All",
@@ -454,20 +462,21 @@
             PRODUCTS = [];
             querySnapshot.forEach((docSnap) => {
               const rawData = docSnap.data();
-              PRODUCTS.push({
+              const sanitizedProd = {
                 docId: docSnap.id,
                 id: Number(rawData.id) || Math.floor(1000 + Math.random() * 9000),
                 title: rawData.title || "Product",
                 category: rawData.category || rawData.catagory || "Men's Unstitched",
                 price: Number(rawData.price) || 0,
                 origPrice: Number(rawData.origPrice || rawData.oriprice) || 0,
-                image: rawData.image || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&auto=format&fit=crop&q=80",
+                image: rawData.image || "https://placehold.co/400x400/e2e8f0/1e293b?text=Noman+Cloth",
                 rating: rawData.rating || 4.8,
-                description: rawData.description || "Premium quality fabric designed for comfort and elegance by Noman Cloth House Pakistan.",
+                description: rawData.description || "Premium quality fabric from Noman Cloth House.",
                 badge: rawData.badge || "",
-                sizes: (rawData.sizes && Array.isArray(rawData.sizes) && rawData.sizes.length > 0) ? rawData.sizes : ["Standard", "Medium", "Large"],
+                sizes: (rawData.sizes && Array.isArray(rawData.sizes) && rawData.sizes.length > 0) ? rawData.sizes : ["Standard"],
                 stockStatus: rawData.stockStatus || rawData.stockstatus || "In Stock"
-              });
+              };
+              PRODUCTS.push(sanitizedProd);
             });
           } else {
             renderEmptyProductsState();
@@ -478,14 +487,13 @@
           return;
         }
       } catch (error) {
-        console.error("Error loading products:", error);
-        renderEmptyProductsState();
+        console.error("Error loading products from Firebase:", error);
       }
       renderProducts();
     }
 
     function renderEmptyProductsState() {
-      const emptyHTML = `<p class="col-span-full text-center text-xs text-slate-400 py-8">No products found in database.</p>`;
+      const emptyHTML = `<p class="col-span-full text-center text-xs text-gray-400 py-8">No products found in Firebase database.</p>`;
       const pGrid = document.getElementById('products-grid');
       const hGrid = document.getElementById('home-products-grid');
       if(pGrid) pGrid.innerHTML = emptyHTML;
@@ -495,8 +503,8 @@
     function switchTab(tabName) {
       document.querySelectorAll('.screen-view').forEach(view => view.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('text-slate-900', 'font-bold');
-        btn.classList.add('text-slate-400');
+        btn.classList.remove('text-emerald-600');
+        btn.classList.add('text-gray-400');
       });
 
       const activeView = document.getElementById(`view-${tabName}`);
@@ -504,8 +512,8 @@
 
       const activeNavBtn = document.getElementById(`nav-${tabName}`);
       if (activeNavBtn) {
-        activeNavBtn.classList.remove('text-slate-400');
-        activeNavBtn.classList.add('text-slate-900', 'font-bold');
+        activeNavBtn.classList.remove('text-gray-400');
+        activeNavBtn.classList.add('text-emerald-600');
       }
       window.scrollTo(0, 0);
     }
@@ -538,15 +546,15 @@
       const matches = PRODUCTS.filter(p => p.title.toLowerCase().includes(val) || p.category.toLowerCase().includes(val));
 
       if(matches.length === 0) {
-        searchGrid.innerHTML = `<p class="col-span-2 text-center text-slate-400 py-8 text-xs">No matching products found.</p>`;
+        searchGrid.innerHTML = `<p class="col-span-2 text-center text-gray-400 py-8 text-xs">No matching products found.</p>`;
         return;
       }
 
       searchGrid.innerHTML = matches.map(item => `
-        <div onclick="closeSearchOverlay(); openProductDetail(${item.id});" class="bg-white rounded-2xl border border-slate-100 p-2.5 shadow-sm cursor-pointer hover:border-slate-300 transition">
-          <img src="${item.image}" class="w-full h-36 object-cover rounded-xl mb-2 bg-slate-50" onerror="this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&auto=format&fit=crop&q=80';">
-          <h5 class="text-xs font-bold text-slate-800 line-clamp-1">${escapeHtml(item.title)}</h5>
-          <span class="text-xs font-black text-slate-900 mt-1 block">Rs ${item.price.toLocaleString()}</span>
+        <div onclick="closeSearchOverlay(); openProductDetail(${item.id});" class="bg-white rounded-xl border border-gray-100 p-2 shadow-sm cursor-pointer hover:border-emerald-500 transition">
+          <img src="${item.image}" class="w-full h-28 object-cover rounded-lg mb-2" onerror="this.src='https://placehold.co/400x400/e2e8f0/1e293b?text=Noman';">
+          <h5 class="text-xs font-bold text-gray-800 line-clamp-1">${escapeHtml(item.title)}</h5>
+          <span class="text-xs font-black text-emerald-600 mt-1 block">Rs ${item.price.toLocaleString()}</span>
         </div>
       `).join('');
     }
@@ -559,10 +567,10 @@
     function renderCategoryPills() {
       const pillHTML = CATEGORIES.map(cat => `
         <button onclick="filterCategory('${cat}')" 
-          class="px-3.5 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition border ${
+          class="px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition border ${
             selectedCategory === cat 
-              ? 'bg-slate-900 text-white border-slate-900 shadow-sm' 
-              : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+              ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' 
+              : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
           }">
           ${cat}
         </button>
@@ -589,7 +597,7 @@
       const hGrid = document.getElementById('home-products-grid');
 
       if(filtered.length === 0) {
-        const noItemsMsg = `<p class="col-span-full text-center text-xs text-slate-400 py-8">No products available in this category.</p>`;
+        const noItemsMsg = `<p class="col-span-full text-center text-xs text-gray-400 py-8">No products available in this category.</p>`;
         if(pGrid) pGrid.innerHTML = noItemsMsg;
         if(hGrid) hGrid.innerHTML = noItemsMsg;
         return;
@@ -598,33 +606,33 @@
       const productCardsHTML = filtered.map(item => {
         const isSoldOut = item.stockStatus === "Sold Out";
         return `
-          <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden flex flex-col justify-between shadow-sm hover:shadow transition relative group">
-            ${item.badge ? `<span class="absolute top-2.5 left-2.5 bg-slate-900 text-white text-[8px] font-bold px-2 py-0.5 rounded uppercase tracking-wider z-10">${item.badge}</span>` : ''}
-            ${isSoldOut ? `<span class="absolute top-2.5 right-2.5 bg-rose-600 text-white text-[8px] font-bold px-2 py-0.5 rounded uppercase tracking-wider z-10">Sold Out</span>` : ''}
+          <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden flex flex-col justify-between shadow-sm hover:shadow-md transition relative group">
+            ${item.badge ? `<span class="absolute top-2 left-2 bg-emerald-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-md z-10 uppercase">${item.badge}</span>` : ''}
+            ${isSoldOut ? `<span class="absolute top-2 right-2 bg-red-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-md z-10 uppercase">Sold Out</span>` : ''}
             
             <div onclick="openProductDetail(${item.id})" class="cursor-pointer">
-              <div class="h-44 bg-slate-50 relative overflow-hidden">
-                <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300 ${isSoldOut ? 'grayscale opacity-75' : ''}" onerror="this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&auto=format&fit=crop&q=80';">
+              <div class="h-40 bg-gray-100 relative overflow-hidden">
+                <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300 ${isSoldOut ? 'grayscale opacity-75' : ''}" onerror="this.src='https://placehold.co/400x400/e2e8f0/1e293b?text=Noman+Cloth';">
               </div>
               
               <div class="p-3 pb-1">
-                <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5">${item.category}</span>
-                <h4 class="text-xs font-bold text-slate-800 line-clamp-1 leading-snug">${escapeHtml(item.title)}</h4>
+                <span class="text-[9px] text-emerald-600 font-bold uppercase tracking-wider block mb-0.5">${item.category}</span>
+                <h4 class="text-xs font-bold text-gray-800 line-clamp-2 leading-snug group-hover:text-emerald-600 transition">${escapeHtml(item.title)}</h4>
                 
-                <div class="flex items-center space-x-1 text-amber-500 text-[9px] mt-1">
+                <div class="flex items-center space-x-1 text-amber-400 text-[10px] mt-1">
                   <i class="fa-solid fa-star"></i>
-                  <span class="text-slate-500 font-semibold">${item.rating}</span>
+                  <span class="text-gray-600 font-medium">${item.rating}</span>
                 </div>
               </div>
             </div>
 
             <div class="p-3 pt-0 flex items-center justify-between mt-2">
               <div>
-                <span class="text-xs font-black text-slate-900 block">Rs ${item.price.toLocaleString()}</span>
-                ${item.origPrice ? `<span class="text-[10px] text-slate-400 line-through">Rs ${item.origPrice.toLocaleString()}</span>` : ''}
+                <span class="text-xs font-extrabold text-slate-900 block">Rs ${item.price.toLocaleString()}</span>
+                ${item.origPrice ? `<span class="text-[10px] text-gray-400 line-through">Rs ${item.origPrice.toLocaleString()}</span>` : ''}
               </div>
 
-              <button onclick="event.stopPropagation(); addToCart(${item.id});" ${isSoldOut ? 'disabled' : ''} class="w-8 h-8 rounded-xl ${isSoldOut ? 'bg-slate-200 cursor-not-allowed' : 'bg-slate-900 hover:bg-slate-800'} text-white flex items-center justify-center transition active:scale-95 shadow">
+              <button onclick="event.stopPropagation(); addToCart(${item.id});" ${isSoldOut ? 'disabled' : ''} class="w-8 h-8 rounded-xl ${isSoldOut ? 'bg-gray-300 cursor-not-allowed' : 'bg-slate-900 hover:bg-emerald-600'} text-white flex items-center justify-center transition active:scale-95 shadow">
                 <i class="fa-solid fa-plus text-xs"></i>
               </button>
             </div>
@@ -648,82 +656,84 @@
       if(!detailContent) return;
 
       detailContent.innerHTML = `
-        <div class="w-full h-80 bg-slate-50 relative">
-          <img src="${prod.image}" class="w-full h-full object-cover ${isSoldOut ? 'grayscale' : ''}" onerror="this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&auto=format&fit=crop&q=80';">
-          ${prod.badge ? `<span class="absolute top-3 left-3 bg-slate-900 text-white text-[9px] font-bold px-3 py-1 rounded uppercase tracking-wider">${prod.badge}</span>` : ''}
+        <div class="w-full h-72 bg-gray-100 relative">
+          <img src="${prod.image}" class="w-full h-full object-cover ${isSoldOut ? 'grayscale' : ''}" onerror="this.src='https://placehold.co/400x400/e2e8f0/1e293b?text=Product';">
+          ${prod.badge ? `<span class="absolute top-3 left-3 bg-emerald-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase shadow">${prod.badge}</span>` : ''}
         </div>
 
         <div class="p-4 space-y-4">
           <div>
             <div class="flex justify-between items-center mb-1">
-              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">${prod.category}</span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isSoldOut ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">
-                ${prod.stockStatus}
+              <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">${prod.category}</span>
+              <span class="text-[10px] font-bold px-2.5 py-1 rounded-full ${isSoldOut ? 'bg-red-100 text-red-600 border border-red-200' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'}">
+                <i class="fa-solid ${isSoldOut ? 'fa-circle-xmark' : 'fa-circle-check'} mr-1"></i> ${prod.stockStatus}
               </span>
             </div>
-            <h1 class="text-base font-bold text-slate-900 leading-snug">${escapeHtml(prod.title)}</h1>
+            <h1 class="text-lg font-bold text-gray-900 leading-snug mt-1">${escapeHtml(prod.title)}</h1>
             
             <div class="flex items-center space-x-2 mt-2">
-              <div class="flex text-amber-500 text-xs">
+              <div class="flex text-amber-400 text-xs">
                 <i class="fa-solid fa-star"></i>
                 <i class="fa-solid fa-star"></i>
                 <i class="fa-solid fa-star"></i>
                 <i class="fa-solid fa-star"></i>
                 <i class="fa-solid fa-star-half-stroke"></i>
               </div>
-              <span class="text-xs font-semibold text-slate-500">${prod.rating} (Verified Reviews)</span>
+              <span class="text-xs font-semibold text-gray-600">${prod.rating} (120+ reviews)</span>
             </div>
           </div>
 
-          <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 flex items-center justify-between">
+          <div class="bg-emerald-50 p-3.5 rounded-2xl border border-emerald-100 flex items-center justify-between">
             <div>
-              <span class="text-lg font-black text-slate-900">Rs ${prod.price.toLocaleString()}</span>
-              ${prod.origPrice ? `<span class="text-xs text-slate-400 line-through ml-2">Rs ${prod.origPrice.toLocaleString()}</span>` : ''}
+              <span class="text-xl font-black text-emerald-700">Rs ${prod.price.toLocaleString()}</span>
+              ${prod.origPrice ? `<span class="text-xs text-gray-400 line-through ml-2">Rs ${prod.origPrice.toLocaleString()}</span>` : ''}
             </div>
-            ${prod.origPrice ? `<span class="text-[10px] bg-slate-900 text-white font-bold px-2.5 py-1 rounded">SAVE ${Math.round((1 - prod.price/prod.origPrice)*100)}%</span>` : ''}
+            ${prod.origPrice ? `<span class="text-xs bg-emerald-600 text-white font-bold px-2.5 py-1 rounded-lg">SAVE ${Math.round((1 - prod.price/prod.origPrice)*100)}%</span>` : ''}
           </div>
 
           <div>
-            <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">Select Size / Fit</label>
+            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Available Size / Fit</label>
             <div class="flex space-x-2 flex-wrap gap-y-2">
               ${productSizes.map((sz, index) => `
-                <button onclick="setSize('${sz}')" id="size-btn-${sz.replace(/[^a-zA-Z0-9]/g, '')}" class="size-option px-4 py-2 rounded-xl border text-xs font-bold transition ${index === 0 ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200'}">
+                <button onclick="setSize('${sz}')" id="size-btn-${sz.replace(/[^a-zA-Z0-9]/g, '')}" class="size-option px-3.5 py-2 rounded-xl border text-xs font-bold transition ${index === 0 ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-gray-700 border-gray-300'}">
                   ${sz}
                 </button>
               `).join('')}
             </div>
           </div>
 
-          <div class="border-t border-slate-100 pt-3">
-            <h3 class="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Description</h3>
-            <p class="text-xs text-slate-500 leading-relaxed">${escapeHtml(prod.description)}</p>
+          <div class="border-t border-gray-100 pt-3">
+            <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wider mb-1.5">Product Description</h3>
+            <p class="text-xs text-gray-600 leading-relaxed">${escapeHtml(prod.description)}</p>
           </div>
 
-          <div class="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 space-y-1.5 text-xs">
-            <div class="flex items-center gap-2 text-slate-700 font-semibold">
-              <i class="fa-solid fa-truck-fast text-slate-900"></i>
+          <div class="bg-gray-50 border border-gray-200 rounded-2xl p-3.5 space-y-2 text-xs">
+            <div class="flex items-center gap-2 text-gray-700 font-semibold">
+              <i class="fa-solid fa-truck-fast text-emerald-600 text-sm"></i>
               <span>Cash on Delivery across Pakistan</span>
             </div>
-            <div class="flex items-center gap-2 text-slate-700 font-semibold">
-              <i class="fa-solid fa-arrows-rotate text-slate-900"></i>
-              <span>7 Days Easy Return & Exchange</span>
+            <div class="flex items-center gap-2 text-gray-700 font-semibold">
+              <i class="fa-solid fa-arrows-rotate text-emerald-600 text-sm"></i>
+              <span>Easy 7 Days Return & Exchange Policy</span>
             </div>
           </div>
         </div>
 
-        <div class="fixed bottom-0 left-0 w-full max-w-[480px] mx-auto bg-white border-t border-slate-100 p-3 z-50 flex items-center gap-2 shadow-lg">
-          ${isSoldOut ? `
-            <div class="w-full bg-rose-50 text-rose-600 border border-rose-200 text-xs font-bold py-3.5 rounded-xl text-center">
-              CURRENTLY OUT OF STOCK
-            </div>
-          ` : `
-            <button onclick="addToCart(${prod.id});" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs font-bold py-3.5 rounded-xl flex items-center justify-center gap-1.5 transition">
-              <i class="fa-solid fa-bag-shopping"></i> ADD TO BAG
-            </button>
-            <button onclick="addToCart(${prod.id}); closeProductDetail(); switchTab('cart');" class="w-1/2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-3.5 rounded-xl flex items-center justify-center gap-1.5 shadow transition">
-              <i class="fa-solid fa-bolt"></i> BUY NOW (COD)
-            </button>
-          `}
+        <div class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-3 z-50 flex items-center justify-center gap-2 shadow-2xl">
+          <div class="max-w-2xl w-full flex items-center gap-2">
+            ${isSoldOut ? `
+              <div class="w-full bg-red-50 text-red-600 border border-red-200 text-xs font-bold py-3.5 rounded-xl text-center">
+                <i class="fa-solid fa-ban mr-1"></i> CURRENTLY OUT OF STOCK
+              </div>
+            ` : `
+              <button onclick="addToCart(${prod.id});" class="w-1/2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-3.5 rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition">
+                <i class="fa-solid fa-bag-shopping"></i> ADD TO CART
+              </button>
+              <button onclick="addToCart(${prod.id}); closeProductDetail(); switchTab('cart');" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-3.5 rounded-xl flex items-center justify-center gap-1.5 active:scale-95 shadow-lg shadow-emerald-600/30 transition">
+                <i class="fa-solid fa-bolt"></i> BUY NOW (COD)
+              </button>
+            `}
+          </div>
         </div>
       `;
 
@@ -739,12 +749,12 @@
       selectedSize = sz;
       document.querySelectorAll('.size-option').forEach(btn => {
         btn.classList.remove('bg-slate-900', 'text-white', 'border-slate-900');
-        btn.classList.add('bg-white', 'text-slate-700', 'border-slate-200');
+        btn.classList.add('bg-white', 'text-gray-700', 'border-gray-300');
       });
       const cleanId = sz.replace(/[^a-zA-Z0-9]/g, '');
       const activeBtn = document.getElementById(`size-btn-${cleanId}`);
       if(activeBtn) {
-        activeBtn.classList.remove('bg-white', 'text-slate-700', 'border-slate-200');
+        activeBtn.classList.remove('bg-white', 'text-gray-700', 'border-gray-300');
         activeBtn.classList.add('bg-slate-900', 'text-white', 'border-slate-900');
       }
     }
@@ -793,11 +803,14 @@
 
     function updateCartBadge() {
       const totalCount = cart.reduce((acc, item) => acc + item.qty, 0);
+      const topBadge = document.getElementById('cart-badge');
       const navBadge = document.getElementById('nav-cart-badge');
 
       if(totalCount > 0) {
+        if(topBadge) { topBadge.innerText = totalCount; topBadge.classList.remove('hidden'); }
         if(navBadge) { navBadge.innerText = totalCount; navBadge.classList.remove('hidden'); }
       } else {
+        if(topBadge) topBadge.classList.add('hidden');
         if(navBadge) navBadge.classList.add('hidden');
       }
     }
@@ -819,23 +832,23 @@
       cartContent.classList.remove('hidden');
 
       listContainer.innerHTML = cart.map(item => `
-        <div class="bg-white p-3 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm">
+        <div class="bg-white p-3 rounded-2xl border border-gray-100 flex items-center justify-between shadow-sm">
           <div class="flex items-center space-x-3">
-            <img src="${item.image}" class="w-14 h-14 rounded-xl object-cover bg-slate-50" onerror="this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&auto=format&fit=crop&q=80';">
+            <img src="${item.image}" class="w-14 h-14 rounded-xl object-cover bg-gray-100" onerror="this.src='https://placehold.co/400x400/e2e8f0/1e293b?text=Item';">
             <div>
-              <h5 class="text-xs font-bold text-slate-800 line-clamp-1">${escapeHtml(item.title)}</h5>
-              <span class="text-[10px] text-slate-400 block">Size: ${item.size}</span>
-              <span class="text-[11px] font-bold text-slate-900 block mt-0.5">Rs ${item.price.toLocaleString()}</span>
+              <h5 class="text-xs font-bold text-gray-800 line-clamp-1">${escapeHtml(item.title)}</h5>
+              <span class="text-[10px] text-gray-400 block">Size: ${item.size}</span>
+              <span class="text-[11px] font-bold text-emerald-600 block mt-0.5">Rs ${item.price.toLocaleString()}</span>
             </div>
           </div>
 
           <div class="flex items-center space-x-2">
-            <div class="flex items-center bg-slate-50 rounded-lg p-0.5 border border-slate-100">
-              <button onclick="updateQty(${item.id}, -1)" class="w-6 h-6 flex items-center justify-center text-xs font-bold text-slate-600 hover:bg-white rounded">-</button>
+            <div class="flex items-center bg-gray-100 rounded-lg p-0.5">
+              <button onclick="updateQty(${item.id}, -1)" class="w-6 h-6 flex items-center justify-center text-xs font-bold text-gray-600 hover:bg-white rounded">-</button>
               <span class="text-xs font-bold px-2">${item.qty}</span>
-              <button onclick="updateQty(${item.id}, 1)" class="w-6 h-6 flex items-center justify-center text-xs font-bold text-slate-600 hover:bg-white rounded">+</button>
+              <button onclick="updateQty(${item.id}, 1)" class="w-6 h-6 flex items-center justify-center text-xs font-bold text-gray-600 hover:bg-white rounded">+</button>
             </div>
-            <button onclick="removeFromCart(${item.id})" class="text-slate-300 hover:text-rose-500 text-sm p-1">
+            <button onclick="removeFromCart(${item.id})" class="text-gray-300 hover:text-red-500 text-sm p-1">
               <i class="fa-solid fa-trash-can"></i>
             </button>
           </div>
@@ -895,7 +908,7 @@
           });
         }
       } catch(e) {
-        console.log("Cart sync error:", e);
+        console.log("Cart sync silent log:", e);
       }
     }
 
@@ -906,7 +919,7 @@
       const submitBtn = document.getElementById('submit-btn');
       if(submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Processing...`;
+        submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> processing...`;
       }
 
       const name = document.getElementById('cust-name').value;
@@ -957,7 +970,7 @@
         const pCont = document.getElementById('prof-contact');
         const pAddr = document.getElementById('prof-address');
         if(pName) pName.innerText = name;
-        if(pCont) pCont.innerText = contact;
+        if(pCont) pCont.innerText = `Firebase UID: ${window.currentCustomerUid || contact}`;
         if(pAddr) pAddr.innerText = `${address}, ${city} (${postal})`;
 
         cart = [];
@@ -975,12 +988,13 @@
       } finally {
         if(submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = `CONFIRM ORDER (COD)`;
+          submitBtn.innerHTML = `<i class="fa-solid fa-check-circle mr-1.5"></i> CONFIRM CASH ON DELIVERY ORDER`;
         }
       }
     }
     window.submitOrder = submitOrder;
 
+    // Submit Customer Feedback to Firebase Firestore
     async function submitFeedback(e) {
       e.preventDefault();
       const name = document.getElementById('fb-name').value;
@@ -1014,36 +1028,36 @@
       
       if(placedOrders.length === 0) {
         container.innerHTML = `
-          <div class="py-16 text-center text-slate-400">
-            <i class="fa-solid fa-box-open text-3xl mb-2 text-slate-300"></i>
-            <p class="text-xs font-semibold">No orders placed yet.</p>
+          <div class="py-12 text-center text-gray-400">
+            <i class="fa-solid fa-box-open text-4xl mb-2 text-gray-300"></i>
+            <p class="text-sm font-medium">No placed orders yet.</p>
           </div>
         `;
         return;
       }
 
       container.innerHTML = placedOrders.map(order => `
-        <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm space-y-3">
-          <div class="flex justify-between items-start border-b border-slate-50 pb-2">
+        <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm space-y-3">
+          <div class="flex justify-between items-start border-b border-gray-100 pb-2">
             <div>
-              <span class="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded uppercase">${order.status}</span>
-              <h4 class="text-xs font-black text-slate-900 mt-1">Order #${order.orderId}</h4>
-              <p class="text-[10px] text-slate-400">${order.date}</p>
+              <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full uppercase">${order.status}</span>
+              <h4 class="text-xs font-black text-gray-900 mt-1">Order #${order.orderId}</h4>
+              <p class="text-[10px] text-gray-400">${order.date}</p>
             </div>
-            <span class="text-xs font-black text-slate-900">Rs ${order.totalCost.toLocaleString()}</span>
+            <span class="text-xs font-black text-emerald-600">Rs ${order.totalCost.toLocaleString()}</span>
           </div>
 
-          <div class="bg-slate-50 p-3 rounded-xl text-[11px] text-slate-600 space-y-1">
-            <p class="font-bold text-slate-800">${escapeHtml(order.customer.name)} (${order.customer.contact})</p>
-            <p>${escapeHtml(order.customer.address)}, ${escapeHtml(order.customer.city)}</p>
-            <p class="text-slate-900 font-semibold"><i class="fa-solid fa-truck text-[10px] mr-1"></i> ${order.courierName} (Fee: Rs ${order.deliveryFee})</p>
-            <p class="text-emerald-700 font-semibold"><i class="fa-solid fa-coins text-[10px] mr-1"></i> Cash on Delivery</p>
+          <div class="bg-gray-50 p-2.5 rounded-xl text-[11px] text-gray-600 space-y-1">
+            <p class="font-bold text-gray-800">${escapeHtml(order.customer.name)} (${order.customer.contact})</p>
+            <p>${escapeHtml(order.customer.address)}, ${escapeHtml(order.customer.city)} - ${order.customer.postal}</p>
+            <p class="text-emerald-700 font-semibold"><i class="fa-solid fa-truck text-[10px] mr-1"></i> ${order.courierName} (Delivery: Rs ${order.deliveryFee})</p>
+            <p class="text-amber-800 font-semibold"><i class="fa-solid fa-coins text-[10px] mr-1"></i> Payment Mode: Cash on Delivery</p>
           </div>
 
           <div class="space-y-1.5 pt-1">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Items:</span>
+            <span class="text-[10px] font-bold text-gray-400 uppercase">Ordered Items:</span>
             ${order.items.map(item => `
-              <div class="flex justify-between text-xs text-slate-700">
+              <div class="flex justify-between text-xs text-gray-700">
                 <span>${item.qty}x ${escapeHtml(item.title)} (${item.size})</span>
                 <span class="font-semibold">Rs ${(item.price * item.qty).toLocaleString()}</span>
               </div>
